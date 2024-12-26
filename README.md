@@ -1,5 +1,6 @@
 # OptiCommute 
 Current Version: 0.0
+
 Developers: Joe Shen, Nathan Xie, Derek Li
 
 ## Description
