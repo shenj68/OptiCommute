@@ -8,4 +8,17 @@ This project provides a way for individuals to determine an optimal time to exit
 
 ## Prerequisites/Setup
 
+for python environment setup:
+
+1. create your virtual environment: 
+    - python -m venv opticommuteenv
+
+2. activate your environment:
+    - source opticommuteenv/Scripts/activate
+
+3. pip install -r requirements.txt
+
+4. install pytorch with cuda 
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
 ## To-Do
