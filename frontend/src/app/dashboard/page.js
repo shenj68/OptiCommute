@@ -1,7 +1,7 @@
 import VideoPlayer from "./components/videoplayer";
 
 export default function Dashboard() {
-  const videoSrc = "/video"; // Replace with your video path
+  const videoSrc = "/video/dummy.mp4"; // Replace with your video path
 
   return (
     <div className="flex flex-col justify-start items-start min-h-screen text-center">
