@@ -6,10 +6,13 @@ import numpy as np
 config = Config()
 config.video_path = "C:/Users/wwwsh/OneDrive/Documents/Projects/OptiCommute/OptiCommute Demo Clip.mp4"  
 config.video_path_output = "output_test.avi"  
-config.area_of_interest_coords = [(100, 100), (300, 100), (300, 250), (100, 250)]
+config.area_of_interest_coords = {
+            'main-road-and-sidewalk': [(5, 176), (6, 223), (610, 372), (625, 273)],
+            'close-sidewalk': [(19, 242), (3, 258), (595, 443), (603, 410)],
+        }
 config.resize_dimension = (640, 480)
 config.save_video = False
-config.see_aoi_mask = True  
+config.see_aoi_mask = False  
 
 preprocessor = Preprocess(config)
 print("Processing video...")

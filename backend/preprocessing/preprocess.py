@@ -56,18 +56,16 @@ class Preprocess:
 
             # resize frame
             resized_frame = cv.resize(frame, self.config.resize_dimension)
+        
+            # combine and apply aoi mask
+            combined_mask = self.create_combined_aoi_mask(resized_frame, self.config.area_of_interest_coords)
 
-            # apply aoi mask
-            aoi_mask, visualized_frame = self.add_aoi_mask(
-                resized_frame,
-                self.config.area_of_interest_coords,
-                visualize_aoi=self.config.see_aoi_mask
-            )
-
+            # visualize aoi if enabled
             if self.config.see_aoi_mask:
+                visualized_frame = self.visualize_multiple_masks(resized_frame, self.config.area_of_interest_coords)
                 output_frame = visualized_frame
             else:
-                output_frame = cv.bitwise_and(resized_frame, resized_frame, mask=aoi_mask)
+                output_frame = cv.bitwise_and(resized_frame, resized_frame, mask=combined_mask)
 
             #output_frame = visualized_frame if self.config.see_aoi_mask else masked_frame
 
@@ -84,19 +82,21 @@ class Preprocess:
         
         return processed_frames
     
-    def add_aoi_mask(self, frame, aoi_coords, visualize_aoi=False):
+    def create_combined_aoi_mask(self, frame, masks):
         """
-        draw and apply the aoi mask on the frame
+        combine multiple AOI masks into a single mask.
         """
-        
-        mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+        combined_mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+        for mask_coords in masks.values():
+            cv.fillPoly(combined_mask, [np.array(mask_coords, dtype=np.int32)], 255)
+        return combined_mask
 
-        cv.fillPoly(mask, [np.array(aoi_coords, dtype=np.int32)], 255) # 255 = white
-
-        if visualize_aoi:
-            visualized_frame = frame.copy()
-            cv.polylines(visualized_frame, [np.array(aoi_coords, dtype=np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
-            return mask, visualized_frame
-
-        return mask, frame
+    def visualize_multiple_masks(self, frame, masks):
+        """
+        visualize multiple AOI masks on the frame.
+        """
+        visualized_frame = frame.copy()
+        for mask_coords in masks.values():
+            cv.polylines(visualized_frame, [np.array(mask_coords, dtype=np.int32)], isClosed=True, color=(0, 255, 0), thickness=2)
+        return visualized_frame
 
