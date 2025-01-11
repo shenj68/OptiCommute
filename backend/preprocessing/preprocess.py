@@ -22,7 +22,7 @@ class Preprocess:
         self.frame_count = int(self.cap.get(cv.CAP_PROP_FRAME_COUNT))
         
         print(f"found video {self.config.video_path}")
-        print(f"video metadata: width: {self.frame_width}, height: {self.frame_height}, fps: {self.fps}, frame_count: {self.frame_count}")
+        print(f"video metadata: \n\t-width: {self.frame_width}, \n\t-height: {self.frame_height}, \n\t-fps: {self.fps}, \n\t-frame_count: {self.frame_count}")
 
         # if save is turned on, we can enable the video writer
         if self.config.save_video:
@@ -36,7 +36,7 @@ class Preprocess:
         else:
             self.out = None
 
-    @staticmethod
+    
     def preprocess(self):
         """
         go through video and extract frame by frame.
@@ -61,12 +61,15 @@ class Preprocess:
             aoi_mask, visualized_frame = self.add_aoi_mask(
                 resized_frame,
                 self.config.area_of_interest_coords,
-                visualize=self.config.see_aoi_mask
+                visualize_aoi=self.config.see_aoi_mask
             )
 
-            masked_frame = cv.bitwise_and(resized_frame, resized_frame, mask=aoi_mask)
+            if self.config.see_aoi_mask:
+                output_frame = visualized_frame
+            else:
+                output_frame = cv.bitwise_and(resized_frame, resized_frame, mask=aoi_mask)
 
-            output_frame = visualized_frame if self.config.see_aoi_mask else masked_frame
+            #output_frame = visualized_frame if self.config.see_aoi_mask else masked_frame
 
             processed_frames.append(output_frame)
 
@@ -81,7 +84,7 @@ class Preprocess:
         
         return processed_frames
     
-    def add_aoi_mask(frame, aoi_coords, visualize_aoi=False):
+    def add_aoi_mask(self, frame, aoi_coords, visualize_aoi=False):
         """
         draw and apply the aoi mask on the frame
         """
