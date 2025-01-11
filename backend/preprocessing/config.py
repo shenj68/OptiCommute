@@ -11,7 +11,9 @@ class Config:
     def __init__(self):
         self.resize_dimension = (640, 480)
         self.area_of_interest_coords = {
-            'main-road-and-sidewalk': [(5, 176), (6, 223), (610, 372), (625, 273)],
+            #'test': [(624, 271), (591, 457), (1, 264), (5, 167)],
+            # 'main-road-and-sidewalk': [(5, 176), (6, 223), (610, 372), (625, 273)],
+            'main-road-and-sidewalk': [(2, 163), (626, 276), (608, 378), (4, 230)],
             'close-sidewalk': [(19, 242), (3, 258), (595, 443), (603, 410)],
         }
         self.save_video = False
