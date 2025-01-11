@@ -1,3 +1,4 @@
 opticommuteenv/
 *.mp4
 *.pt
+*__pycache__
