@@ -18,10 +18,11 @@ class ObjectDetection:
             raise RuntimeError(f"Error loading YOLO model: {e}")
 
         self.config = config
-        self.confidence_threshold = 0.45
+        self.confidence_threshold = 0.38
         self.class_of_interests = [0, 1, 2, 5, 7]  # person, bicycle, car, bus, truck
+        self.static_object_frames = {}
 
-    def detect_objects(self, frame):
+    def detect_objects(self, frame, frame_index):
         """
         perform object detection on a single frame.
         """
@@ -39,6 +40,9 @@ class ObjectDetection:
 
         # filter detections by AOI
         detections = self.filter_detections_by_aoi(detections, self.config.area_of_interest_coords)
+
+        # static detection check (multiple frames)
+        detections = self.detect_static_detections(detections, frame_index)
 
         return detections
 
@@ -90,3 +94,67 @@ class ObjectDetection:
             if cv.pointPolygonTest(polygon, (cx, cy), False) >= 0:
                 return mask_name
         return None
+    
+    def detect_static_detections(self, detections, frame_index):
+        """
+        detect static detections across multiple frames 
+        """
+        filtered_detections = []
+        iou_threshold = 0.5  # IOU threshold for static object matching
+
+        for detection in detections:
+            x1, y1, x2, y2 = detection['bounding_box']
+            current_bbox = [x1, y1, x2, y2]
+
+            # check if the object is static
+            static = False
+            for static_bbox, (last_seen, count) in list(self.static_object_frames.items()):
+                
+                # calculate current IoU between the current bounding box and the tracked static bounding box
+                iou = self.calculate_iou(current_bbox, static_bbox)
+                if iou >= iou_threshold:
+                    # update last seen and increment the static count
+                    self.static_object_frames[tuple(static_bbox)] = (frame_index, count + 1)
+
+                    # mark detction as static if it > static_frame_threshold
+                    if count + 1 >= self.config.static_frame_threshold:
+                        static = True
+                    break
+
+            if not static:
+                # add the detection to filtered results as normal
+                filtered_detections.append(detection)
+                # track this detection for static suppression
+                self.static_object_frames[tuple(current_bbox)] = (frame_index, 1)
+
+        # remove outdated static objects
+        self.static_object_frames = {
+            bbox: (last_seen, count)
+            for bbox, (last_seen, count) in self.static_object_frames.items()
+            if frame_index - last_seen < self.config.static_frame_threshold
+        }
+
+        return filtered_detections
+
+    def calculate_iou(self, boxA, boxB):
+        """
+        calculate the Intersection over Union (IoU) between two bounding boxes.
+        """
+        xA = max(boxA[0], boxB[0])
+        yA = max(boxA[1], boxB[1])
+        xB = min(boxA[2], boxB[2])
+        yB = min(boxA[3], boxB[3])
+
+        # compute intersection area
+        interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+
+        # compute union area
+        boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+        boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+
+        # avoid division by zero
+        unionArea = boxAArea + boxBArea - interArea
+        if unionArea == 0:
+            return 0.0
+
+        return interArea / unionArea
