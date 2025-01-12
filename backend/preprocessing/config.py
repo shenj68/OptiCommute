@@ -9,13 +9,19 @@ class Config:
     """
 
     def __init__(self):
+        # preprocess
         self.resize_dimension = (640, 480)
         self.area_of_interest_coords = {
-            'main-road-and-sidewalk': [(5, 176), (6, 223), (610, 372), (625, 273)],
-            'close-sidewalk': [(19, 242), (3, 258), (595, 443), (603, 410)],
+            'test': [(3, 159), (624, 244), (592, 454), (3, 277)],
+            # 'main-road-and-sidewalk': [(5, 176), (6, 223), (610, 372), (625, 273)],
+            #'main-road-and-sidewalk': [(2, 163), (626, 276), (608, 378), (4, 230)],
+            #'close-sidewalk': [(14, 240), (602, 405), (592, 453), (5, 271)],
         }
         self.save_video = False
         self.video_path = "C:/Users/wwwsh/OneDrive/Documents/Projects/OptiCommute/OptiCommute Demo Clip.mp4"
         self.video_path_output = "output/processed_vid.mp4"
         self.see_aoi_mask = False
-        
+
+        # object detection
+        self.static_frame_threshold = 30
+        self.center_distance_threshold = 15
